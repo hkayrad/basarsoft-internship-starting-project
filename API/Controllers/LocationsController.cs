@@ -1,71 +1,50 @@
 using API.Models.Location;
 using API.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class LocationsController : ControllerBase
+    public class LocationsController(ILocationServices locationServices) : BaseLocationsController
     {
-        private readonly ILocationServices _locationServices;
-
-        public LocationsController(ILocationServices locationServices)
-        {
-            _locationServices = locationServices;
-        }
-
-        [HttpGet]
-        public async Task<ActionResult<Location[]>> GetLocations()
-        {
-            var result = await _locationServices.GetLocations();
-
-            if (result == null || result.Length == 0)
-                return NotFound("No locations found.");
-
-            return Ok(result);
-        }
-
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Location>> GetLocation(int id)
-        {
-            var result = await _locationServices.GetLocationById(id);
-
-            if (result == null)
-                return NotFound("Location not found.");
-
-            return Ok(result);
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteLocation(int id)
-        {
-            await _locationServices.DeleteLocation(id);
-            return NoContent();
-        }
+        private readonly ILocationServices _locationServices = locationServices;
 
         [HttpPost]
-        public async Task<ActionResult> AddLocation(AddLocationDto location)
+        public ActionResult<Response<int>> AddLocation(AddLocationDto location)
         {
-            await _locationServices.AddLocation(location);
-            return NoContent();
+            return HandleResponse(_locationServices.AddLocation(location));
         }
 
         [HttpPost("addMultiple")]
-        public async Task<ActionResult> AddLocations(AddLocationDto[] locations)
+        public ActionResult<Response<int[]>> AddLocations(AddLocationDto[] locations)
         {
-            await _locationServices.AddLocations(locations);
-            return NoContent();
+            return HandleResponse(_locationServices.AddLocations(locations));
         }
 
-        [HttpPut]
-        public async Task<ActionResult> UpdateLocation(UpdateLocationDto location)
+        [HttpGet]
+        public ActionResult<Response<Location[]>> GetLocations()
         {
-            await _locationServices.UpdateLocation(location);
-            return NoContent();
+            return HandleResponse(_locationServices.GetLocations());
         }
 
+        [HttpGet("{id}")]
+        public ActionResult<Response<Location>> GetLocation(int id)
+        {
+            return HandleResponse(_locationServices.GetLocationById(id));
+        }
+
+        [HttpPut("{id}")]
+        public ActionResult<Response<Location>> UpdateLocation(int id, UpdateLocationDto location)
+        {
+            return HandleResponse(_locationServices.UpdateLocation(id, location));
+        }
+
+        [HttpDelete("{id}")]
+        public ActionResult<Response<bool>> DeleteLocation(int id)
+        {
+            return HandleResponse(_locationServices.DeleteLocation(id));
+        }
     };
 }
 

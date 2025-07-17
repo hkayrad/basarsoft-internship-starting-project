@@ -5,15 +5,15 @@ namespace API.Services;
 
 public interface ILocationServices
 {
-    Task<Location[]> GetLocations();
+    Response<Location[]> GetLocations();
 
-    Task<Location> GetLocationById(int id);
+    Response<Location> GetLocationById(int id);
 
-    Task DeleteLocation(int id);
+    Response<int> AddLocation(AddLocationDto location);
 
-    Task AddLocation(AddLocationDto location);
+    Response<int[]> AddLocations(AddLocationDto[] locations);
 
-    Task UpdateLocation(UpdateLocationDto location);
+    Response<bool> DeleteLocation(int id);
 
-    Task AddLocations(AddLocationDto[] locations);
+    Response<Location> UpdateLocation(int id, UpdateLocationDto location);
 }
