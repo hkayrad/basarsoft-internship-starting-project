@@ -6,7 +6,7 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class LocationsController(ILocationServices locationServices) : BaseLocationsController
+    public class LocationsController(ILocationServices locationServices) : BaseController
     {
         private readonly ILocationServices _locationServices = locationServices;
 
@@ -23,9 +23,9 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public ActionResult<Response<Location[]>> GetLocations()
+        public ActionResult<Response<Location[]>> GetLocations([FromQuery(Name = "pageNumber")] int? pageNumber)
         {
-            return HandleResponse(_locationServices.GetLocations());
+            return HandleResponse(_locationServices.GetLocations(pageNumber));
         }
 
         [HttpGet("{id}")]

@@ -37,7 +37,7 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddSwaggerGen();
-builder.Services.AddSingleton<ILocationServices, StringLocationServices>();
+builder.Services.AddSingleton<ILocationServices, ArrayLocationServices>();
 
 var app = builder.Build();
 

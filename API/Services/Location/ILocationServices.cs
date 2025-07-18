@@ -5,7 +5,7 @@ namespace API.Services;
 
 public interface ILocationServices
 {
-    Response<Location[]> GetLocations();
+    Response<Location[]> GetLocations(int? pageNumber);
 
     Response<Location> GetLocationById(int id);
 

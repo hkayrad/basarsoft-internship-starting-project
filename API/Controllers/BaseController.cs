@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
-public class BaseLocationsController : ControllerBase
+public class BaseController : ControllerBase
 {
     protected ActionResult HandleResponse<T>(Response<T> response)
     {
