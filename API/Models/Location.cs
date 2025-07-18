@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace API;
+namespace API.Models;
 
 public class Location : IValidatableObject
 {

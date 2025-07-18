@@ -1,49 +1,51 @@
-using API.Models.Location;
+using API.Models;
+using API.Models.DTOs.Location;
 using API.Services;
+using API.Services.Location;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class LocationsController(ILocationServices locationServices) : BaseController
+    public class LocationsController(ILocationServices locationServices)
     {
         private readonly ILocationServices _locationServices = locationServices;
 
         [HttpPost]
-        public ActionResult<Response<int>> AddLocation(AddLocationDto location)
+        public async Task<Response<int>> AddLocation(AddLocationDto location)
         {
-            return HandleResponse(_locationServices.AddLocation(location));
+            return await _locationServices.AddLocation(location);
         }
 
         [HttpPost("addMultiple")]
-        public ActionResult<Response<int[]>> AddLocations(AddLocationDto[] locations)
+        public async Task<Response<int[]>> AddLocations(AddLocationDto[] locations)
         {
-            return HandleResponse(_locationServices.AddLocations(locations));
+            return await _locationServices.AddLocations(locations);
         }
 
         [HttpGet]
-        public ActionResult<Response<Location[]>> GetLocations([FromQuery(Name = "pageNumber")] int? pageNumber)
+        public async Task<Response<Location[]>> GetLocations([FromQuery(Name = "pageNumber")] int? pageNumber, [FromQuery(Name = "pageSize")] int? pageSize)
         {
-            return HandleResponse(_locationServices.GetLocations(pageNumber));
+            return await _locationServices.GetLocations(pageNumber, pageSize);
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Response<Location>> GetLocation(int id)
+        public async Task<Response<Location>> GetLocation(int id)
         {
-            return HandleResponse(_locationServices.GetLocationById(id));
+            return await _locationServices.GetLocationById(id);
         }
 
         [HttpPut("{id}")]
-        public ActionResult<Response<Location>> UpdateLocation(int id, UpdateLocationDto location)
+        public async Task<Response<Location>> UpdateLocation(int id, UpdateLocationDto location)
         {
-            return HandleResponse(_locationServices.UpdateLocation(id, location));
+            return await _locationServices.UpdateLocation(id, location);
         }
 
         [HttpDelete("{id}")]
-        public ActionResult<Response<bool>> DeleteLocation(int id)
+        public async Task<Response<bool>> DeleteLocation(int id)
         {
-            return HandleResponse(_locationServices.DeleteLocation(id));
+            return await _locationServices.DeleteLocation(id);
         }
     };
 }

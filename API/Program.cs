@@ -1,7 +1,9 @@
-using API.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
-using API;
+using Npgsql;
+using API.Services.Location;
+using API.Models;
+using API.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,7 +39,15 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddSwaggerGen();
-builder.Services.AddSingleton<ILocationServices, ArrayLocationServices>();
+builder.Services.AddSingleton<ILocationServices, PostgresqlLocationServices>();
+
+// Initialize the database connection
+var connectionString = builder.Configuration.GetConnectionString("PostgreSQL");
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new InvalidOperationException("Connection string 'PostgreSQL' is not configured.");
+}
+DbHelper.Initialize(connectionString);
 
 var app = builder.Build();
 

@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace API;
+namespace API.Models;
 
 public class Response<T>()
 {

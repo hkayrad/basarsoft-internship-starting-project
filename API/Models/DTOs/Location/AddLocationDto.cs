@@ -1,6 +1,6 @@
 using System;
 
-namespace API.Models.Location;
+namespace API.Models.DTOs.Location;
 
 public class AddLocationDto : BaseLocationDto
 {

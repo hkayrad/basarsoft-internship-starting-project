@@ -1,19 +1,20 @@
 using System;
-using API.Models.Location;
+using API.Models;
+using API.Models.DTOs.Location;
 
-namespace API.Services;
+namespace API.Services.Location;
 
 public interface ILocationServices
 {
-    Response<Location[]> GetLocations(int? pageNumber);
+    Task<Response<int>> AddLocation(AddLocationDto location);
 
-    Response<Location> GetLocationById(int id);
+    Task<Response<int[]>> AddLocations(AddLocationDto[] locations);
 
-    Response<int> AddLocation(AddLocationDto location);
+    Task<Response<Models.Location[]>> GetLocations(int? pageNumber, int? pageSize);
 
-    Response<int[]> AddLocations(AddLocationDto[] locations);
+    Task<Response<Models.Location>> GetLocationById(int id);
 
-    Response<bool> DeleteLocation(int id);
+    Task<Response<Models.Location>> UpdateLocation(int id, UpdateLocationDto location);
 
-    Response<Location> UpdateLocation(int id, UpdateLocationDto location);
+    Task<Response<bool>> DeleteLocation(int id);
 }
