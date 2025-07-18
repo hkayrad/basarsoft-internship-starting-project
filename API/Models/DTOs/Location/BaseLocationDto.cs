@@ -19,7 +19,7 @@ public class BaseLocationDto : IValidatableObject
             if (Name.Length > 100 || Name.Length < 3)
                 yield return new ValidationResult("Name must be between 3 and 100 characters.", [nameof(Name)]);
 
-            if (Regex.IsMatch(Name, @"[^a-zA-Z0-9 ]"))
+            if (Regex.IsMatch(Name, @"[^a-zA-Z0-9 ,'()/-]"))
                 yield return new ValidationResult("Name cannot contain special characters.", [nameof(Name)]);
         }
 
