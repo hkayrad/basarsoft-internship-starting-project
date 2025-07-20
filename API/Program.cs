@@ -1,18 +1,16 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using Npgsql;
-using API.Services.Location;
+using API.Services.Feature;
 using API.Models;
 using API.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
 
-// ---------------
-// Configure API behavior to return custom response format for validation errors
+// --------------- Configure API behavior to return custom response format for validation errors
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     options.InvalidModelStateResponseFactory = context =>
@@ -39,15 +37,18 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddSwaggerGen();
-builder.Services.AddSingleton<ILocationServices, PostgresqlLocationServices>();
 
-// Initialize the database connection
+// Register the feature services
+builder.Services.AddSingleton<IFeatureServices, PostgresqlFeatureServices>();
+
+// --------------- Initialize the database connection
 var connectionString = builder.Configuration.GetConnectionString("PostgreSQL");
 if (string.IsNullOrEmpty(connectionString))
 {
     throw new InvalidOperationException("Connection string 'PostgreSQL' is not configured.");
 }
 DbHelper.Initialize(connectionString);
+// ---------------
 
 var app = builder.Build();
 

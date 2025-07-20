@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace API.Models;
 
-public class Location : IValidatableObject
+public class Feature : IValidatableObject
 {
     public int Id { get; set; }
 

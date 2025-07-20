@@ -29,7 +29,7 @@ public class Response<T>()
         {
             IsSuccess = false,
             Message = message,
-            Status = status
+            Status = status,
         };
     }
 }

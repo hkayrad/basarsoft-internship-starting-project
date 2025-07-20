@@ -1,10 +1,10 @@
 
-namespace API.Models.DTOs.Location;
+namespace API.Models.DTOs.Feature;
 
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 
-public class BaseLocationDto : IValidatableObject
+public class BaseFeatureDto : IValidatableObject
 {
     public required string Name { get; set; }
 
