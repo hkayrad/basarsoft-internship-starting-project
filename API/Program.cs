@@ -1,17 +1,32 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
-using Npgsql;
 using API.Services.Feature;
 using API.Models;
-using API.Helpers;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using API.Models.Contexts;
 using Microsoft.EntityFrameworkCore;
+using Asp.Versioning;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+    options.ApiVersionReader = ApiVersionReader.Combine(
+        new UrlSegmentApiVersionReader(),
+        new HeaderApiVersionReader("x-api-version")
+    );
+}).AddApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'VVV";
+    options.SubstituteApiVersionInUrl = true;
+
+});
 
 // --------------- Configure API behavior to return custom response format for validation errors
 builder.Services.Configure<ApiBehaviorOptions>(options =>
@@ -39,7 +54,10 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 // ---------------
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(config =>
+{
+    config.SwaggerDoc("v1", new OpenApiInfo { Title = "Basarsoft API", Version = "v1" });
+});
 
 // Register the feature services
 builder.Services.AddScoped<IFeatureServices, PostgresqlEFFeatureServices>();
