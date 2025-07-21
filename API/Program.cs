@@ -4,6 +4,9 @@ using Npgsql;
 using API.Services.Feature;
 using API.Models;
 using API.Helpers;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using API.Models.Contexts;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,7 +42,7 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 builder.Services.AddSwaggerGen();
 
 // Register the feature services
-builder.Services.AddSingleton<IFeatureServices, PostgresqlFeatureServices>();
+builder.Services.AddScoped<IFeatureServices, PostgresqlEFFeatureServices>();
 
 // --------------- Initialize the database connection
 var connectionString = builder.Configuration.GetConnectionString("PostgreSQL");
@@ -47,8 +50,11 @@ if (string.IsNullOrEmpty(connectionString))
 {
     throw new InvalidOperationException("Connection string 'PostgreSQL' is not configured.");
 }
-DbHelper.Initialize(connectionString);
+// DbHelper.Initialize(connectionString);
 // ---------------
+
+builder.Services.AddDbContext<FeatureContext>(options =>
+    options.UseNpgsql(connectionString));
 
 var app = builder.Build();
 

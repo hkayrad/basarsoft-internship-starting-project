@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  
+  <!-- Error Messages -->
+  <data name="FeatureCannotBeNull" xml:space="preserve">
+    <value>Feature cannot be null</value>
+  </data>
+  <data name="FeatureNotFound" xml:space="preserve">
+    <value>Feature not found</value>
+  </data>
+  <data name="NoFeaturesFound" xml:space="preserve">
+    <value>No features found</value>
+  </data>
+  <data name="NoFeaturesToAdd" xml:space="preserve">
+    <value>No features to add</value>
+  </data>
+  <data name="CannotAddMoreThan25Features" xml:space="preserve">
+    <value>Cannot add more than 25 features at once</value>
+  </data>
+  <data name="FeatureIdMustBeGreaterThanZero" xml:space="preserve">
+    <value>Feature ID must be greater than zero</value>
+  </data>
+  <data name="PageNumberAndSizeMustBeProvidedTogether" xml:space="preserve">
+    <value>Page number and size must be provided together</value>
+  </data>
+  <data name="PageNumberAndSizeMustBeGreaterThanZero" xml:space="preserve">
+    <value>Page number and size must be greater than zero</value>
+  </data>
+  <data name="NoFeaturesFoundForSpecifiedPage" xml:space="preserve">
+    <value>No features found for the specified page</value>
+  </data>
+  <data name="FailedToAddFeature" xml:space="preserve">
+    <value>Failed to add feature</value>
+  </data>
+  <data name="FailedToAddFeatures" xml:space="preserve">
+    <value>Failed to add features</value>
+  </data>
+  <data name="ErrorAddingFeatures" xml:space="preserve">
+    <value>Error adding features: {0}</value>
+  </data>
+  
+  <!-- Success Messages -->
+  <data name="FeatureAddedSuccessfully" xml:space="preserve">
+    <value>Feature added successfully</value>
+  </data>
+  <data name="FeaturesAddedSuccessfully" xml:space="preserve">
+    <value>Features added successfully</value>
+  </data>
+  <data name="FeatureRetrievedSuccessfully" xml:space="preserve">
+    <value>Feature retrieved successfully</value>
+  </data>
+  <data name="FeaturesRetrievedSuccessfully" xml:space="preserve">
+    <value>Features retrieved successfully</value>
+  </data>
+  <data name="FeatureUpdatedSuccessfully" xml:space="preserve">
+    <value>Feature updated successfully</value>
+  </data>
+  <data name="FeatureDeletedSuccessfully" xml:space="preserve">
+    <value>Feature deleted successfully</value>
+  </data>
+</root>
