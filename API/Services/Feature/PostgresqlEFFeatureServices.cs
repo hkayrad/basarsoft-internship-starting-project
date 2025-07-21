@@ -34,22 +34,37 @@ public class PostgresqlEFFeatureServices(FeatureContext context) : IFeatureServi
         if (addFeatureDtos == null || addFeatureDtos.Length == 0)
             return Response<int[]>.Fail(FeatureServicesResourceHelper.GetString("FeaturesCannotBeNullOrEmpty"), HttpStatusCode.BadRequest);
 
-        var features = new List<Models.Feature>();
+        if (addFeatureDtos.Length > 25)
+            return Response<int[]>.Fail(FeatureServicesResourceHelper.GetString("BatchSizeLimitExceeded"), HttpStatusCode.BadRequest);
 
-        foreach (var dto in addFeatureDtos)
+        using var transaction = await _context.Database.BeginTransactionAsync();
+
+        try
         {
-            var feature = new Models.Feature
+            var features = new List<Models.Feature>();
+
+            foreach (var dto in addFeatureDtos)
             {
-                Name = dto.Name,
-                Wkt = dto.Wkt
-            };
-            features.Add(feature);
+                var feature = new Models.Feature
+                {
+                    Name = dto.Name,
+                    Wkt = dto.Wkt
+                };
+                features.Add(feature);
+            }
+
+            _context.Features.AddRange(features);
+            await _context.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+
+            return Response<int[]>.Success([.. features.Select(x => x.Id)], FeatureServicesResourceHelper.GetString("FeaturesAddedSuccessfully"));
         }
-
-        _context.Features.AddRange(features);
-        await _context.SaveChangesAsync();
-
-        return Response<int[]>.Success([.. features.Select(f => f.Id)], FeatureServicesResourceHelper.GetString("FeaturesAddedSuccessfully"));
+        catch (Exception)
+        {
+            await transaction.RollbackAsync();
+            return Response<int[]>.Fail(FeatureServicesResourceHelper.GetString("FailedToAddFeatures"), HttpStatusCode.InternalServerError);
+        }
     }
 
     public async Task<Response<Models.Feature>> GetFeatureById(int id)
