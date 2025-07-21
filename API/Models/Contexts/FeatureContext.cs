@@ -18,15 +18,15 @@ public class FeatureContext(DbContextOptions<FeatureContext> options) : DbContex
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id")
-                .HasDefaultValueSql("nextval('locations_id_seq'::regclass)");
+                .HasDefaultValueSql("nextval('features_id_seq'::regclass)");
             entity.Property(e => e.Name)
-                .HasColumnType("character varying")
+                .HasColumnType("varchar(100)")
                 .HasColumnName("name");
             entity.Property(e => e.Wkt)
-                .HasColumnType("character varying")
+                .HasColumnType("varchar")
                 .HasColumnName("wkt");
         });
 
-        modelBuilder.HasSequence("locations_id_seq", "id");
+        modelBuilder.HasSequence("features_id_seq", "id");
     }
 }
