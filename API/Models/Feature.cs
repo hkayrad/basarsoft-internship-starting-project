@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace API.Models;
 
-public partial class Feature
+public partial class Feature : IDisposable
 {
     [Column(TypeName = "int4")]
     public int Id { get; set; }
@@ -14,4 +14,6 @@ public partial class Feature
 
     [Column(TypeName = "varchar")]
     public string Wkt { get; set; } = null!;
+
+    public void Dispose() { }
 }

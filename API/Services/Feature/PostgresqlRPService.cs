@@ -8,7 +8,7 @@ using Npgsql;
 
 namespace API.Services.Feature;
 
-public class PostgresqlRepositoryService(IFeatureRepository featureRepository) : IFeatureService
+public class PostgresqlRPService(IFeatureRepository featureRepository) : IFeatureService
 {
     private readonly IFeatureRepository _featureRepository = featureRepository;
 
