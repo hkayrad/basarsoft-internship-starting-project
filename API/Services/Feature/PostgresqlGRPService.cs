@@ -1,67 +1,73 @@
 using System;
 using System.Net;
+using API.DAL;
 using API.Helpers.Resources;
 using API.Models;
 using API.Models.DTOs.Feature;
-using API.Repositories.GRP;
 using Npgsql;
 
 namespace API.Services.Feature;
 
-public class PostgresqlGRPService(IGenericRepository<Models.Feature> featureRepository) : IFeatureService
+public class PostgresqlGRPService(IUnitOfWork unitOfWork) : IFeatureService
 {
-    private readonly IGenericRepository<Models.Feature> _featureRepository = featureRepository;
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     public async Task<Response<int>> AddFeature(AddFeatureDto addFeatureDto)
     {
         if (addFeatureDto == null)
-            return Response<int>.Fail(FeatureServicesResourceHelper.GetString("FeatureCannotBeNull"), HttpStatusCode.BadRequest);
-
-        var feature = new Models.Feature
-        {
-            Name = addFeatureDto.Name,
-            Wkt = addFeatureDto.Wkt
-        };
+            return Response<int>.Fail(FeatureServicesResourceHelper.GetString("FeatureDataCannotBeNull"), HttpStatusCode.BadRequest);
 
         try
         {
-            var addedFeatureId = await _featureRepository.AddAsync(feature);
-            return Response<int>.Success(addedFeatureId, FeatureServicesResourceHelper.GetString("FeatureAddedSuccessfully"));
+            var feature = new Models.Feature
+            {
+                Name = addFeatureDto.Name,
+                Wkt = addFeatureDto.Wkt
+            };
+
+            await _unitOfWork.FeatureRepository.AddAsync(feature);
+            await _unitOfWork.SaveChangesAsync();
+
+            return Response<int>.Success(feature.Id, FeatureServicesResourceHelper.GetString("FeatureAddedSuccessfully"));
         }
         catch (NpgsqlException ex)
         {
-            return Response<int>.Fail(FeatureServicesResourceHelper.GetString("ErrorAddingFeature", ex.Message), HttpStatusCode.InternalServerError);
+            return Response<int>.Fail($"Database error: {ex.Message}", HttpStatusCode.InternalServerError);
         }
     }
 
     public async Task<Response<int[]>> AddFeatures(AddFeatureDto[] addFeatureDtos)
     {
         if (addFeatureDtos == null || addFeatureDtos.Length == 0)
-            return Response<int[]>.Fail(FeatureServicesResourceHelper.GetString("FeaturesCannotBeNullOrEmpty"), HttpStatusCode.BadRequest);
-
-        if (addFeatureDtos.Length > 25)
-            return Response<int[]>.Fail(FeatureServicesResourceHelper.GetString("BatchSizeLimitExceeded"), HttpStatusCode.BadRequest);
+            return Response<int[]>.Fail(FeatureServicesResourceHelper.GetString("FeatureDataCannotBeNullOrEmpty"), HttpStatusCode.BadRequest);
 
         try
         {
-            var features = new List<Models.Feature>();
-            foreach (var dto in addFeatureDtos)
+            await _unitOfWork.BeginTransactionAsync();
+
+            List<Models.Feature> features = new();
+
+            foreach (var addFeatureDto in addFeatureDtos)
             {
                 var feature = new Models.Feature
                 {
-                    Name = dto.Name,
-                    Wkt = dto.Wkt
+                    Name = addFeatureDto.Name,
+                    Wkt = addFeatureDto.Wkt
                 };
                 features.Add(feature);
             }
 
-            var addedFeatureIds = await _featureRepository.AddRangeAsync([.. features]);
+            await _unitOfWork.FeatureRepository.AddRangeAsync([.. features]);
+            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.CommitTransactionAsync();
 
-            return Response<int[]>.Success(addedFeatureIds, FeatureServicesResourceHelper.GetString("FeaturesAddedSuccessfully"));
+            return Response<int[]>.Success([.. features.Select(x => x.Id)], FeatureServicesResourceHelper.GetString("FeaturesAddedSuccessfully"));
+
         }
-        catch (Exception)
+        catch (NpgsqlException ex)
         {
-            return Response<int[]>.Fail(FeatureServicesResourceHelper.GetString("FailedToAddFeatures"), HttpStatusCode.InternalServerError);
+            await _unitOfWork.RollbackTransactionAsync();
+            return Response<int[]>.Fail(FeatureServicesResourceHelper.GetString("DatabaseError", ex.Message), HttpStatusCode.InternalServerError);
         }
     }
 
@@ -72,8 +78,7 @@ public class PostgresqlGRPService(IGenericRepository<Models.Feature> featureRepo
 
         try
         {
-            var feature = await _featureRepository.GetByIdAsync(id);
-
+            var feature = await _unitOfWork.FeatureRepository.GetByIdAsync(id);
             if (feature == null)
                 return Response<Models.Feature>.Fail(FeatureServicesResourceHelper.GetString("FeatureNotFound"), HttpStatusCode.NotFound);
 
@@ -81,37 +86,40 @@ public class PostgresqlGRPService(IGenericRepository<Models.Feature> featureRepo
         }
         catch (NpgsqlException ex)
         {
-            return Response<Models.Feature>.Fail(FeatureServicesResourceHelper.GetString("ErrorRetrievingFeature", ex.Message), HttpStatusCode.InternalServerError);
+            return Response<Models.Feature>.Fail(FeatureServicesResourceHelper.GetString("DatabaseError", ex.Message), HttpStatusCode.InternalServerError);
         }
     }
 
     public async Task<Response<Models.Feature[]>> GetFeatures(int? pageNumber, int? pageSize)
     {
-        List<Models.Feature>? features;
+        if (pageNumber.HasValue || pageSize.HasValue)
+        {
+            if (!pageNumber.HasValue || !pageSize.HasValue)
+                return Response<Models.Feature[]>.Fail(FeatureServicesResourceHelper.GetString("PageNumberAndSizeMustBeProvidedTogether"), HttpStatusCode.BadRequest);
+
+            if (pageNumber <= 0 || pageSize <= 0)
+                return Response<Models.Feature[]>.Fail(FeatureServicesResourceHelper.GetString("PageNumberAndSizeMustBeGreaterThanZero"), HttpStatusCode.BadRequest);
+
+            try
+            {
+                var features = await _unitOfWork.FeatureRepository.GetPagedAsync(pageNumber.Value, pageSize.Value);
+                return Response<Models.Feature[]>.Success([.. features], FeatureServicesResourceHelper.GetString("FeaturesRetrievedSuccessfully"), HttpStatusCode.OK);
+            }
+            catch (NpgsqlException ex)
+            {
+                return Response<Models.Feature[]>.Fail(FeatureServicesResourceHelper.GetString("DatabaseError", ex.Message), HttpStatusCode.InternalServerError);
+            }
+
+        }
 
         try
         {
-            if (pageNumber.HasValue || pageSize.HasValue)
-            {
-                // Both of them should be available together
-                if (!pageNumber.HasValue || !pageSize.HasValue)
-                    return Response<Models.Feature[]>.Fail(FeatureServicesResourceHelper.GetString("PageNumberAndSizeMustBeProvidedTogether"), HttpStatusCode.BadRequest);
-
-                if (pageNumber < 1 || pageSize < 1)
-                    return Response<Models.Feature[]>.Fail(FeatureServicesResourceHelper.GetString("PageNumberAndSizeMustBeGreaterThanZero"), HttpStatusCode.BadRequest);
-
-                features = await _featureRepository.GetPagedAsync(pageNumber.Value, pageSize.Value);
-
-                return Response<Models.Feature[]>.Success([.. features], FeatureServicesResourceHelper.GetString("FeaturesRetrievedSuccessfully"));
-            }
-
-            features = await _featureRepository.GetAllAsync();
-
+            var features = await _unitOfWork.FeatureRepository.GetAllAsync();
             return Response<Models.Feature[]>.Success([.. features], FeatureServicesResourceHelper.GetString("FeaturesRetrievedSuccessfully"));
         }
         catch (NpgsqlException ex)
         {
-            return Response<Models.Feature[]>.Fail(FeatureServicesResourceHelper.GetString("ErrorRetrievingFeatures", ex.Message), HttpStatusCode.InternalServerError);
+            return Response<Models.Feature[]>.Fail(FeatureServicesResourceHelper.GetString("DatabaseError", ex.Message), HttpStatusCode.InternalServerError);
         }
     }
 
@@ -121,24 +129,25 @@ public class PostgresqlGRPService(IGenericRepository<Models.Feature> featureRepo
             return Response<Models.Feature>.Fail(FeatureServicesResourceHelper.GetString("FeatureIdMustBeGreaterThanZero"), HttpStatusCode.BadRequest);
 
         if (updateFeatureDto == null)
-            return Response<Models.Feature>.Fail(FeatureServicesResourceHelper.GetString("FeatureCannotBeNull"), HttpStatusCode.BadRequest);
+            return Response<Models.Feature>.Fail(FeatureServicesResourceHelper.GetString("FeatureDataCannotBeNull"), HttpStatusCode.BadRequest);
 
         try
         {
-            var existingFeature = await _featureRepository.GetByIdAsync(id);
-            if (existingFeature == null)
+            var feature = await _unitOfWork.FeatureRepository.GetByIdAsync(id);
+            if (feature == null)
                 return Response<Models.Feature>.Fail(FeatureServicesResourceHelper.GetString("FeatureNotFound"), HttpStatusCode.NotFound);
 
-            existingFeature.Name = updateFeatureDto.Name;
-            existingFeature.Wkt = updateFeatureDto.Wkt;
+            feature.Name = updateFeatureDto.Name;
+            feature.Wkt = updateFeatureDto.Wkt;
 
-            await _featureRepository.UpdateAsync(existingFeature);
+            await _unitOfWork.FeatureRepository.UpdateAsync(feature);
+            await _unitOfWork.SaveChangesAsync();
 
-            return Response<Models.Feature>.Success(existingFeature, FeatureServicesResourceHelper.GetString("FeatureUpdatedSuccessfully"));
+            return Response<Models.Feature>.Success(feature, FeatureServicesResourceHelper.GetString("FeatureUpdatedSuccessfully"), HttpStatusCode.OK);
         }
         catch (NpgsqlException ex)
         {
-            return Response<Models.Feature>.Fail(FeatureServicesResourceHelper.GetString("ErrorUpdatingFeature", ex.Message), HttpStatusCode.InternalServerError);
+            return Response<Models.Feature>.Fail(FeatureServicesResourceHelper.GetString("DatabaseError", ex.Message), HttpStatusCode.InternalServerError);
         }
     }
 
@@ -149,17 +158,18 @@ public class PostgresqlGRPService(IGenericRepository<Models.Feature> featureRepo
 
         try
         {
-            var feature = await _featureRepository.GetByIdAsync(id);
+            var feature = await _unitOfWork.FeatureRepository.GetByIdAsync(id);
             if (feature == null)
                 return Response<bool>.Fail(FeatureServicesResourceHelper.GetString("FeatureNotFound"), HttpStatusCode.NotFound);
 
-            await _featureRepository.DeleteAsync(id);
+            await _unitOfWork.FeatureRepository.DeleteAsync(id);
+            await _unitOfWork.SaveChangesAsync();
 
-            return Response<bool>.Success(true, FeatureServicesResourceHelper.GetString("FeatureDeletedSuccessfully"));
+            return Response<bool>.Success(true, FeatureServicesResourceHelper.GetString("FeatureDeletedSuccessfully"), HttpStatusCode.OK);
         }
         catch (NpgsqlException ex)
         {
-            return Response<bool>.Fail(FeatureServicesResourceHelper.GetString("ErrorDeletingFeature", ex.Message), HttpStatusCode.InternalServerError);
+            return Response<bool>.Fail(FeatureServicesResourceHelper.GetString("DatabaseError", ex.Message), HttpStatusCode.InternalServerError);
         }
     }
 }

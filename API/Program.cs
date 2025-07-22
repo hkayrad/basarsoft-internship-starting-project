@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Asp.Versioning;
 using Microsoft.OpenApi.Models;
 using API.Repositories.GRP;
+using API.DAL;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -73,7 +74,7 @@ builder.Services.AddDbContext<MapInfoContext>(options =>
     options.UseNpgsql(connectionString));
 
 // Register the feature services
-builder.Services.AddScoped<IGenericRepository<Feature>, FeatureRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IFeatureService, PostgresqlGRPService>();
 
 var app = builder.Build();

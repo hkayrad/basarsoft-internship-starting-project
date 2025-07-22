@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Repositories.GRP;
 
-public class GenericRepository<T> : IGenericRepository<T> where T : class, IDisposable
+public class GenericRepository<T> : IGenericRepository<T> where T : class
 {
     protected readonly DbContext _context;
     protected readonly DbSet<T> _dbSet;
@@ -17,28 +17,14 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class, IDisp
 
     public async Task<int> AddAsync(T entity)
     {
-        _dbSet.Add(entity);
-        await _context.SaveChangesAsync();
+        await _dbSet.AddAsync(entity);
         return (int)(typeof(T).GetProperty("Id")?.GetValue(entity) ?? 0); // Assuming T has an Id property
     }
 
     public async Task<int[]> AddRangeAsync(T[] entities)
     {
-        using (var transaction = await _context.Database.BeginTransactionAsync())
-        {
-            try
-            {
-                await _dbSet.AddRangeAsync(entities);
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
-                return [.. entities.Select(e => (int)(typeof(T).GetProperty("Id")?.GetValue(e) ?? 0))];
-            }
-            catch
-            {
-                await transaction.RollbackAsync();
-                throw;
-            }
-        }
+        await _dbSet.AddRangeAsync(entities);
+        return [.. entities.Select(e => (int)(typeof(T).GetProperty("Id")?.GetValue(e) ?? 0))]; // Assuming T has an Id property
     }
 
     public async Task<bool> DeleteAsync(int id)
@@ -47,7 +33,6 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class, IDisp
         if (entity != null)
         {
             _dbSet.Remove(entity);
-            await _context.SaveChangesAsync();
             return true;
         }
 
@@ -75,7 +60,6 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class, IDisp
     public async Task<T> UpdateAsync(T entity)
     {
         _dbSet.Update(entity);
-        await _context.SaveChangesAsync();
         return entity;
     }
 }

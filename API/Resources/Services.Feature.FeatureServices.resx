@@ -101,6 +101,9 @@
   <data name="ErrorAddingFeature" xml:space="preserve">
     <value>Error adding feature: {0}</value>
   </data>
+  <data name="DatabaseError" xml:space="preserve">
+    <value>Database error: {0}</value>
+  </data>
 
   <!-- Success Messages -->
   <data name="FeatureAddedSuccessfully" xml:space="preserve">
