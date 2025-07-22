@@ -71,7 +71,7 @@ if (string.IsNullOrEmpty(connectionString))
 // DbHelper.Initialize(connectionString);
 // ---------------
 
-builder.Services.AddDbContext<FeatureContext>(options =>
+builder.Services.AddDbContext<MapInfoContext>(options =>
     options.UseNpgsql(connectionString));
 
 var app = builder.Build();

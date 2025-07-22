@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Models.Contexts;
 
-public class FeatureContext(DbContextOptions<FeatureContext> options) : DbContext(options)
+public class MapInfoContext(DbContextOptions<MapInfoContext> options) : DbContext(options)
 {
     public DbSet<Feature> Features { get; set; }
 

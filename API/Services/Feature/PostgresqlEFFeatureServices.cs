@@ -8,9 +8,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Services.Feature;
 
-public class PostgresqlEFFeatureServices(FeatureContext context) : IFeatureServices
+public class PostgresqlEFFeatureServices(MapInfoContext dbContext) : IFeatureServices
 {
-    private readonly FeatureContext _context = context;
+    private readonly MapInfoContext _dbContext = dbContext;
 
     public async Task<Response<int>> AddFeature(AddFeatureDto addFeatureDto)
     {
@@ -23,8 +23,8 @@ public class PostgresqlEFFeatureServices(FeatureContext context) : IFeatureServi
             Wkt = addFeatureDto.Wkt
         };
 
-        _context.Features.Add(feature);
-        await _context.SaveChangesAsync();
+        _dbContext.Features.Add(feature);
+        await _dbContext.SaveChangesAsync();
 
         return Response<int>.Success(feature.Id, FeatureServicesResourceHelper.GetString("FeatureAddedSuccessfully"));
     }
@@ -37,7 +37,7 @@ public class PostgresqlEFFeatureServices(FeatureContext context) : IFeatureServi
         if (addFeatureDtos.Length > 25)
             return Response<int[]>.Fail(FeatureServicesResourceHelper.GetString("BatchSizeLimitExceeded"), HttpStatusCode.BadRequest);
 
-        using var transaction = await _context.Database.BeginTransactionAsync();
+        using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
         try
         {
@@ -53,8 +53,8 @@ public class PostgresqlEFFeatureServices(FeatureContext context) : IFeatureServi
                 features.Add(feature);
             }
 
-            _context.Features.AddRange(features);
-            await _context.SaveChangesAsync();
+            _dbContext.Features.AddRange(features);
+            await _dbContext.SaveChangesAsync();
 
             await transaction.CommitAsync();
 
@@ -72,7 +72,7 @@ public class PostgresqlEFFeatureServices(FeatureContext context) : IFeatureServi
         if (id <= 0)
             return Response<Models.Feature>.Fail(FeatureServicesResourceHelper.GetString("FeatureIdMustBeGreaterThanZero"), HttpStatusCode.BadRequest);
 
-        var feature = await _context.Features.FindAsync(id);
+        var feature = await _dbContext.Features.FindAsync(id);
 
         if (feature == null)
             return Response<Models.Feature>.Fail(FeatureServicesResourceHelper.GetString("FeatureNotFound"), HttpStatusCode.NotFound);
@@ -93,7 +93,7 @@ public class PostgresqlEFFeatureServices(FeatureContext context) : IFeatureServi
             if (pageNumber < 1 || pageSize < 1)
                 return Response<Models.Feature[]>.Fail(FeatureServicesResourceHelper.GetString("PageNumberAndSizeMustBeGreaterThanZero"), HttpStatusCode.BadRequest);
 
-            features = await _context.Features
+            features = await _dbContext.Features
                 .Skip(pageSize.Value * (pageNumber.Value - 1))
                 .Take(pageSize.Value)
                 .ToListAsync();
@@ -101,7 +101,7 @@ public class PostgresqlEFFeatureServices(FeatureContext context) : IFeatureServi
             return Response<Models.Feature[]>.Success([.. features], FeatureServicesResourceHelper.GetString("FeaturesRetrievedSuccessfully"));
         }
 
-        features = await _context.Features.ToListAsync();
+        features = await _dbContext.Features.ToListAsync();
 
         return Response<Models.Feature[]>.Success([.. features], FeatureServicesResourceHelper.GetString("FeaturesRetrievedSuccessfully"));
     }
@@ -114,15 +114,15 @@ public class PostgresqlEFFeatureServices(FeatureContext context) : IFeatureServi
         if (updateFeatureDto == null)
             return Response<Models.Feature>.Fail(FeatureServicesResourceHelper.GetString("FeatureCannotBeNull"), HttpStatusCode.BadRequest);
 
-        var existingFeature = await _context.Features.FindAsync(id);
+        var existingFeature = await _dbContext.Features.FindAsync(id);
         if (existingFeature == null)
             return Response<Models.Feature>.Fail(FeatureServicesResourceHelper.GetString("FeatureNotFound"), HttpStatusCode.NotFound);
 
         existingFeature.Name = updateFeatureDto.Name;
         existingFeature.Wkt = updateFeatureDto.Wkt;
 
-        _context.Features.Update(existingFeature);
-        await _context.SaveChangesAsync();
+        _dbContext.Features.Update(existingFeature);
+        await _dbContext.SaveChangesAsync();
 
         return Response<Models.Feature>.Success(existingFeature, FeatureServicesResourceHelper.GetString("FeatureUpdatedSuccessfully"));
     }
@@ -132,12 +132,12 @@ public class PostgresqlEFFeatureServices(FeatureContext context) : IFeatureServi
         if (id <= 0)
             return Response<bool>.Fail(FeatureServicesResourceHelper.GetString("FeatureIdMustBeGreaterThanZero"), HttpStatusCode.BadRequest);
 
-        var feature = await _context.Features.FindAsync(id);
+        var feature = await _dbContext.Features.FindAsync(id);
         if (feature == null)
             return Response<bool>.Fail(FeatureServicesResourceHelper.GetString("FeatureNotFound"), HttpStatusCode.NotFound);
 
-        _context.Features.Remove(feature);
-        await _context.SaveChangesAsync();
+        _dbContext.Features.Remove(feature);
+        await _dbContext.SaveChangesAsync();
 
         return Response<bool>.Success(true, FeatureServicesResourceHelper.GetString("FeatureDeletedSuccessfully"));
     }
