@@ -6,7 +6,9 @@ namespace API.Helpers.Resources;
 // research
 public static class FeatureDtoResourceHelper
 {
-    private static readonly ResourceManager _resourceManager = new ResourceManager("API.Resources.Models.DTOs.Feature.FeatureDto", typeof(FeatureDtoResourceHelper).Assembly);
+    private static readonly ResourceManager _resourceManager =
+        new ResourceManager("API.Resources.Models.DTOs.Feature.FeatureDto", typeof(FeatureDtoResourceHelper).Assembly);
+        
     public static string GetString(string key)
     {
         return _resourceManager.GetString(key) ?? key;
