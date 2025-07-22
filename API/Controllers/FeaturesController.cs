@@ -9,9 +9,9 @@ namespace API.Controllers
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
-    public class FeaturesController(IFeatureServices featureServices) : ControllerBase
+    public class FeaturesController(IFeatureService featureServices) : ControllerBase
     {
-        private readonly IFeatureServices _featureServices = featureServices;
+        private readonly IFeatureService _featureServices = featureServices;
 
         [MapToApiVersion("1.0")]
         [HttpPost]

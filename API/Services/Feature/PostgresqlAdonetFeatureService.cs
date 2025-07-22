@@ -8,7 +8,7 @@ using Npgsql;
 
 namespace API.Services.Feature;
 
-public class PostgresqlAdonetFeatureServices : IFeatureServices
+public class PostgresqlAdonetFeatureService : IFeatureService
 {
     private readonly string _featuresTableName = "features";
     private readonly NpgsqlDataSource _dataSource = DbHelper.DataSource!;

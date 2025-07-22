@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Services.Feature;
 
-public class PostgresqlEFFeatureServices(MapInfoContext dbContext) : IFeatureServices
+public class PostgresqlEFFeatureService(MapInfoContext dbContext) : IFeatureService
 {
     private readonly MapInfoContext _dbContext = dbContext;
 

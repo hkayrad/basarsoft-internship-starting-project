@@ -4,7 +4,7 @@ using API.Models.DTOs.Feature;
 
 namespace API.Services.Feature;
 
-public class ArrayFeatureServices : IFeatureServices
+public class ArrayFeatureService : IFeatureService
 {
     private Models.Feature[] features = [
         new Models.Feature { Id = 1, Name = "Feature1", Wkt = "POINT(1 1)" },

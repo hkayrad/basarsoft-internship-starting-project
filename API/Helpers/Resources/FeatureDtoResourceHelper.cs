@@ -3,6 +3,7 @@ using System.Resources;
 
 namespace API.Helpers.Resources;
 
+// research
 public static class FeatureDtoResourceHelper
 {
     private static readonly ResourceManager _resourceManager = new ResourceManager("API.Resources.Models.DTOs.Feature.FeatureDto", typeof(FeatureDtoResourceHelper).Assembly);

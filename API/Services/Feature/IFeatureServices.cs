@@ -4,7 +4,7 @@ using API.Models.DTOs.Feature;
 
 namespace API.Services.Feature;
 
-public interface IFeatureServices
+public interface IFeatureService
 {
     Task<Response<int>> AddFeature(AddFeatureDto addFeatureDto);
 

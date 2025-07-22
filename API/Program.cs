@@ -6,6 +6,7 @@ using API.Models.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Asp.Versioning;
 using Microsoft.OpenApi.Models;
+using API.Repositories.RP;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,9 +60,6 @@ builder.Services.AddSwaggerGen(config =>
     config.SwaggerDoc("v1", new OpenApiInfo { Title = "Basarsoft API", Version = "v1" });
 });
 
-// Register the feature services
-builder.Services.AddScoped<IFeatureServices, PostgresqlEFFeatureServices>();
-
 // --------------- Initialize the database connection
 var connectionString = builder.Configuration.GetConnectionString("PostgreSQL");
 if (string.IsNullOrEmpty(connectionString))
@@ -73,6 +71,10 @@ if (string.IsNullOrEmpty(connectionString))
 
 builder.Services.AddDbContext<MapInfoContext>(options =>
     options.UseNpgsql(connectionString));
+
+// Register the feature services
+builder.Services.AddScoped<IFeatureRepository, FeatureRepository>();
+builder.Services.AddScoped<IFeatureService, PostgresqlRepositoryService>();
 
 var app = builder.Build();
 
