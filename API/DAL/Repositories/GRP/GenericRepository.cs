@@ -60,6 +60,6 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
     public async Task<T> UpdateAsync(T entity)
     {
         _dbSet.Update(entity);
-        return entity;
+        return await Task.FromResult(entity);
     }
 }
